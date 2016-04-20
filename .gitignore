@@ -1,12 +1,120 @@
-*.class
+/*
+ * TermFrequencyTable.java
+ * 
+ * This is an unordered list of articles. Dumb, dumb, dumb. You will rewrite this as a hash table. 
+ *
+ * Author: Guocheng Xia (guocheng@bu.edu)
+ * 
+ * Date: March 24, 2016
+ */
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+public class TermFrequencyTable {
+    private class Node{
+        String term;
+        int[] termFreq = new int[2];
+        Node next;
+        private Node(String a){
+            this.term = a;
+            this.next = null;
+        }
+    }
+    public static Node[] root;
+    public static int M = 2003;
+    public static int N = 1999;
+    
+    public TermFrequencyTable(){
+        root = new Node[M];
+    }
+    public void insert(String term, int docNum){
+        //String[] process = insertHelper(term);
+        String[] process = term.split("\\s+");
+        for (int i = 0; i < process.length; i++){
+            //if (check(process[i]))
+            //    continue;
+            //else{
+                int h = hash(process[i]);
+                if (member(process[i],h) != null){
+                    Node q = member(process[i],h);
+                    q.termFreq[docNum]++;
+                }    
+                else{
+                    Node a = new Node(process[i]);
+                    a.termFreq[docNum]++;
+                    a.next = root[h];
+                    root[h] = a;
+                }
+            //}
+        }
+    }
+    
+    public Node member(String t, int h){
+        Node p = root[h];
+        while (p != null){
+            if (t.equals(p.term))
+                return p;
+            p = p.next;
+        }
+        return null;
+    }
+    
+    public static boolean check(String s){
+        String[] a = {"the", "a", "to", "with", "up"};
+        for (int i = 0; i < a.length;i++){
+            if (a[i].equals(s))
+                return true;
+        }
+        return false;
+    }
+    
+        
+    private static int hash(String t){
+        char ch[];
+        ch = t.toCharArray();
+        int tlength = t.length();
 
-# Package Files #
-*.jar
-*.war
-*.ear
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+        int i, sum;
+        for (sum=0, i=0; i < t.length(); i++)
+            sum += ch[i]*N;
+        return sum % M;
+    }
+ 
+    
+//    private String[] insertHelper(String s){
+//        s = s.toLowerCase();
+//        char[] charsToRemove = {'.', ',', ':', ';', '!', '?', '"', '\'', 
+//                '/', '-', '(', ')', '~'};
+//        for (int i = 0; i < charsToRemove.length; i++){       
+//                String removePun = Character.toString(charsToRemove[i]);
+//                s = s.replace(removePun, "");
+//            }
+//        String[] stringArray = s.split("\\s+");
+//        return stringArray;
+//    }
+    
+    public double cosineSimilarity(){
+        int a = 0;
+        int b = 0;
+        int ab = 0;
+        for (int i = 0; i < root.length; i++){
+            Node p = root[i];
+            while(p != null){
+                int f = root[i].termFreq[0];
+                int s = root[i].termFreq[1];
+                ab += f*s;
+                a += f*f;
+                b += s*s;
+                p = p.next;
+            }
+        }
+        double ans = ab/(Math.sqrt(a)*Math.sqrt(b));
+        return ans;
+    }
+    
+    public static void main(String[] args){
+        TermFrequencyTable a = new TermFrequencyTable();
+        a.insert("CS112 HW10",0);
+        a.insert("CS112 HW10 HW10",1);
+        System.out.println(a.cosineSimilarity());
+        
+    }
+}
